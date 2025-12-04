@@ -27,6 +27,8 @@
 #include "src/experimental/standalone_pem/tracepoint_manager.h"
 #include "src/experimental/standalone_pem/vizier_server.h"
 #include "src/shared/metadata/metadata.h"
+#include "src/shared/metadata/metadata_filter.h"
+#include "src/experimental/standalone_pem/local_k8s_update_receiver.h"
 #include "src/stirling/stirling.h"
 #include "src/vizier/funcs/context/vizier_context.h"
 #include "src/vizier/services/agent/shared/base/base_manager.h"
@@ -81,7 +83,10 @@ class StandalonePEMManager : public BaseManager {
   std::unique_ptr<StandaloneGRPCResultSinkServer> results_sink_server_;
   std::unique_ptr<VizierGRPCServer> vizier_grpc_server_;
 
+  // Metadata filter backing the metadata state manager (required by Impl variant).
+  std::unique_ptr<px::md::AgentMetadataFilter> agent_metadata_filter_;
   std::unique_ptr<px::md::AgentMetadataStateManager> mds_manager_;
+  std::unique_ptr<LocalK8sUpdateReceiver> local_k8s_receiver_;
   // The timer to manage metadata updates.
   px::event::TimerUPtr metadata_update_timer_;
 

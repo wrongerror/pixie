@@ -23,7 +23,9 @@
 #include "src/experimental/standalone_pem/sink_server.h"
 #include "src/experimental/standalone_pem/standalone_pem_manager.h"
 #include "src/experimental/standalone_pem/vizier_server.h"
-#include "src/shared/metadata/standalone_state_manager.h"
+#include "src/common/system/config.h"
+#include "src/shared/metadata/metadata_filter.h"
+#include "src/shared/metadata/state_manager.h"
 #include "src/shared/schema/utils.h"
 #include "src/table_store/table_store.h"
 #include "src/vizier/funcs/funcs.h"
@@ -102,8 +104,20 @@ StandalonePEMManager::StandalonePEMManager(sole::uuid agent_id, std::string_view
                                        std::move(clients_config), std::move(server_config))
                 .ConsumeValueOrDie();
 
-  mds_manager_ = std::make_unique<px::md::StandaloneAgentMetadataStateManager>(
-      info_.hostname, info_.asid, info_.pid, info_.agent_id, time_system_.get());
+    // Create a metadata filter and the full-featured metadata state manager
+    // (supports K8s ResourceUpdate ingestion via AddK8sUpdate).
+    PX_CHECK_OK_AND_ASSIGN(
+      agent_metadata_filter_,
+      px::md::AgentMetadataFilter::Create(/*max_entries=*/10000, /*error_rate=*/0.01,
+                        px::md::kMetadataFilterEntities));
+    mds_manager_ = std::make_unique<px::md::AgentMetadataStateManagerImpl>(
+      info_.hostname, info_.asid, info_.pid, /*pod_name=*/"", info_.agent_id,
+      /*collects_data=*/true, px::system::Config::GetInstance(), agent_metadata_filter_.get(),
+      /*vizier_id=*/sole::uuid{}, /*vizier_name=*/"standalone_pem",
+      /*vizier_namespace=*/"", time_system_.get());
+
+    // Initialize local K8s update receiver (transport to be added later).
+    local_k8s_receiver_ = std::make_unique<LocalK8sUpdateReceiver>(mds_manager_.get());
 
   tracepoint_manager_ =
       std::make_unique<TracepointManager>(dispatcher_.get(), stirling_.get(), table_store_.get());

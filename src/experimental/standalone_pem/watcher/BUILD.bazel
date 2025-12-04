@@ -1,0 +1,32 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library")
+load("//bazel:pl_build_system.bzl", "pl_go_binary", "pl_go_image")
+
+go_library(
+    name = "watcher_lib",
+    srcs = ["main.go"],
+    importpath = "px.dev/pixie/src/experimental/standalone_pem/watcher",
+    visibility = ["//visibility:private"],
+    deps = [
+        "//src/shared/k8s/metadatapb:metadata_pl_go_proto",
+        "@com_github_sirupsen_logrus//:logrus",
+        "@io_k8s_api//core/v1:core",
+        "@io_k8s_api//apps/v1:apps",
+        "@io_k8s_client_go//kubernetes",
+        "@io_k8s_client_go//rest",
+        "@io_k8s_client_go//tools/cache",
+        "@io_k8s_client_go//informers",
+        "@io_k8s_apimachinery//pkg/apis/meta/v1:meta",
+    ],
+)
+
+pl_go_binary(
+    name = "watcher",
+    embed = [":watcher_lib"],
+    visibility = ["//src:__subpackages__"],
+)
+
+pl_go_image(
+    name = "watcher_image",
+    binary = ":watcher",
+    visibility = ["//src:__subpackages__", "//charts:__subpackages__"],
+)

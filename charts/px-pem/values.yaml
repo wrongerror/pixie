@@ -3,6 +3,19 @@ image:
   tag: dev
   pullPolicy: IfNotPresent
 
+watcher:
+  image:
+    repository: wrongerror/watcher_image
+    tag: dev
+    pullPolicy: IfNotPresent
+  resources:
+    limits:
+      cpu: 200m
+      memory: 128Mi
+    requests:
+      cpu: 100m
+      memory: 64Mi
+
 resources:
   limits:
     cpu: 1000m
@@ -50,6 +63,10 @@ env:
     value: /host
   - name: PL_CLOCK_CONVERTER
     value: default
+
+  # Local UDS path shared with watcher sidecar
+  - name: PL_LOCAL_K8S_UPDATE_UDS
+    value: "/var/run/px-pem/mds.sock"
 
 port: 12345
 

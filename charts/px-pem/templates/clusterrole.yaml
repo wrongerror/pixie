@@ -20,4 +20,11 @@ rules:
     resources:
       - endpointslices
     verbs: ["get", "list", "watch"]
+
+  # Apps resources for ownership lineage
+  - apiGroups: ["apps"]
+    resources:
+      - replicasets
+      - deployments
+    verbs: ["get", "list", "watch"]
 {{- end }}

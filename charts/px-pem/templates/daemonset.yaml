@@ -77,6 +77,20 @@ spec:
             - name: px-pem-run
               mountPath: /var/run/px-pem
               readOnly: false
+        - name: watcher
+          image: "{{ .Values.watcher.image.repository }}:{{ .Values.watcher.image.tag }}"
+          imagePullPolicy: {{ .Values.watcher.image.pullPolicy }}
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+          resources:
+            {{- toYaml .Values.watcher.resources | nindent 12 }}
+          env:
+            - name: PL_LOCAL_K8S_UPDATE_UDS
+              value: "/var/run/px-pem/mds.sock"
+          volumeMounts:
+            - name: px-pem-run
+              mountPath: /var/run/px-pem
+              readOnly: false
       volumes:
         - name: host-root
           hostPath:

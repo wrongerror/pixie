@@ -128,6 +128,15 @@ pl_cc_base_packages = [
     packages["zlib1g"],
 ]
 
+# Variant without libc6 to avoid downgrading glibc in base images when using Ubuntu 24.04.
+pl_cc_base_packages_no_libc6 = [
+    packages["libelf1"],
+    packages["liblzma5"],
+    packages["libtinfo6"],
+    packages["libunwind8"],
+    packages["zlib1g"],
+]
+
 # These filegroups aren't strictly necessary but nice to avoid the extra @*_model//file:, in any other rules that want
 # to use these files.
 filegroup(
@@ -173,6 +182,14 @@ container_image(
         "//:embedding.proto",
         "//:sentencepiece.proto",
     ],
+    visibility = ["//visibility:public"],
+)
+
+# Base image for Ubuntu 24.04 runtime using system glibc, without installing libc6 via debs.
+container_image(
+    name = "pl_cc_base_image_noble",
+    base = "@base_image//image",
+    debs = pl_cc_base_packages_no_libc6,
     visibility = ["//visibility:public"],
 )
 

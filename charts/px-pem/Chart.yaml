@@ -1,0 +1,6 @@
+apiVersion: v2
+name: px-pem
+description: Standalone Pixie PEM DaemonSet
+version: 0.1.0
+appVersion: "dev"
+type: application

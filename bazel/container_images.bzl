@@ -50,10 +50,12 @@ def base_images():
         digest = "sha256:2259f28de01f85c22e32b6964254a4551c54a1d554cd4b5f1615d7497e1a09ce",
     )
 
-    _container_image(
+    # Use Ubuntu 24.04 as the base to provide glibc >= 2.38
+    container_pull(
         name = "base_image",
-        repository = "distroless/base",
-        digest = "sha256:8267a5d9fa15a538227a8850e81cf6c548a78de73458e99a67e8799bbffb1ba0",
+        registry = "index.docker.io",
+        repository = "library/ubuntu",
+        tag = "24.04",
     )
 
     _container_image(

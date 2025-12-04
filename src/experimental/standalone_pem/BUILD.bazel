@@ -69,7 +69,7 @@ pl_cc_binary(
 
 container_image(
     name = "standalone_pem_base_image",
-    base = "//:pl_cc_base_image",
+    base = "//:pl_cc_base_image_noble",
     layers = ["//src/stirling:bpf_layer"],
 )
 
@@ -86,16 +86,16 @@ container_push(
     name = "push_standalone_pem_image",
     format = "Docker",
     image = ":standalone_pem_image",
-    registry = "gcr.io",
-    repository = "pixie-oss/pixie-dev/vizier/standalone_pem_image",
-    tag = "{STABLE_BUILD_TAG}",
+    registry = "docker.io",
+    repository = "wrongerror/standalone_pem_image",
+    tag = "dev",
 )
 
 container_push(
     name = "push_test_standalone_pem_image",
     format = "Docker",
     image = ":standalone_pem_image",
-    registry = "gcr.io",
-    repository = "pixie-oss/pixie-dev/vizier/standalone_pem_image",
-    tag = "{BUILD_USER}",
+    registry = "docker.io",
+    repository = "wrongerror/standalone_pem_image",
+    tag = "dev",
 )

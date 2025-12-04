@@ -1,0 +1,58 @@
+image:
+  repository: wrongerror/standalone_pem_image
+  tag: dev
+  pullPolicy: IfNotPresent
+
+resources:
+  limits:
+    cpu: 1000m
+    memory: 1024Mi
+  requests:
+    cpu: 200m
+    memory: 256Mi
+
+nodeSelector: {}
+affinity: {}
+tolerations: {}
+
+serviceAccount:
+  create: true
+  name: ""
+
+pod:
+  hostNetwork: true
+  hostPID: true
+  dnsPolicy: ClusterFirstWithHostNet
+
+securityContext:
+  privileged: true
+  # BPF + perf needs CAP_SYS_ADMIN/CAP_NET_ADMIN; some clusters may require additional caps
+  capabilities:
+    add:
+      - SYS_ADMIN
+      - NET_ADMIN
+      - SYS_RESOURCE
+      - SYS_PTRACE
+
+podAnnotations: {}
+
+env:
+  # Example: set log level or feature gates if needed
+  - name: PX_LOG_LEVEL
+    value: INFO
+  # Tune tcmalloc sampling to reduce overhead, matches vizier-pem default
+  - name: TCMALLOC_SAMPLE_PARAMETER
+    value: "1048576"
+  # Standalone mode typically disables SSL unless you provide certs
+  - name: PL_DISABLE_SSL
+    value: "true"
+  - name: PL_HOST_PATH
+    value: /host
+  - name: PL_CLOCK_CONVERTER
+    value: default
+
+port: 12345
+
+rbac:
+  # Standalone PEM typically needs minimal K8s API read; disable if not required
+  enabled: true

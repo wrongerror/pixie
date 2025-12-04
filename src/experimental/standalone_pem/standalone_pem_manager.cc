@@ -23,12 +23,19 @@
 #include "src/experimental/standalone_pem/sink_server.h"
 #include "src/experimental/standalone_pem/standalone_pem_manager.h"
 #include "src/experimental/standalone_pem/vizier_server.h"
+#include "src/experimental/standalone_pem/local_k8s_update_receiver.h"
+#include "src/experimental/standalone_pem/local_k8s_update_server.h"
+#include "src/common/base/base.h"
 #include "src/common/system/config.h"
 #include "src/shared/metadata/metadata_filter.h"
 #include "src/shared/metadata/state_manager.h"
 #include "src/shared/schema/utils.h"
 #include "src/table_store/table_store.h"
 #include "src/vizier/funcs/funcs.h"
+
+#include <gflags/gflags.h>
+#include <unistd.h>
+#include <limits.h>
 
 DEFINE_int32(
     table_store_data_limit, gflags::Int32FromEnv("PL_TABLE_STORE_DATA_LIMIT_MB", 1024 + 256),
@@ -163,6 +170,10 @@ Status StandalonePEMManager::Init() {
   vizier_grpc_server_ =
       std::make_unique<VizierGRPCServer>(port_, carnot_.get(), results_sink_server_.get(),
                                          carnot_->GetEngineState(), tracepoint_manager_.get());
+
+  // Start local K8s update UDS server to receive ResourceUpdate messages from sidecar.
+  local_k8s_update_server_ = std::make_unique<LocalK8sUpdateServer>(local_k8s_receiver_.get());
+  PX_RETURN_IF_ERROR(local_k8s_update_server_->Start());
 
   return Status::OK();
 }
